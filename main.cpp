@@ -90,7 +90,9 @@ bool operator==(const matrix2<T> &lhs, const matrix2<T> &rhs) {
 }
 
 template <typename T>
-bool operator!=(const matrix2<T> &l, const matrix2<T> &r);
+bool operator!=(const matrix2<T> &l, const matrix2<T> &r) {
+  return !(l == r);
+}
 
 // binární aritmetické operátory
 template <typename T>
@@ -171,6 +173,8 @@ int main() {
     assert(!(m1 == m3));
     assert(!(m2 == m3));
 
+    assert(m1 != m3);
+    assert(m2 != m3);
   }
 
   return 0;
