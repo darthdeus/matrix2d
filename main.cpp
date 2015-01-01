@@ -30,7 +30,18 @@ class matrix2 {
   const T &at(std::size_t i, std::size_t j) const { return _data.at(i).at(j); }
 
   // přičtení matice stejného rozměru
-  matrix2<T> &operator+=(const matrix2<T> &rhs);
+  matrix2<T> &operator+=(const matrix2<T> &rhs) {
+    if (m() != rhs.m()) { throw std::range_error("Row size must be the same"); }
+    if (n() != rhs.n()) { throw std::range_error("Column size must be the same"); }
+
+    for (std::size_t i = 0; i < m(); i++) {
+      for (std::size_t j = 0; j < n(); j++) {
+        at(i, j) += rhs.at(i, j);
+      }
+    }
+
+    return *this;
+  }
 
   // přinásobení matice odpovídajících rozměrů (může změnit velikost matice)
   matrix2<T> &operator*=(const matrix2<T> &m);
@@ -64,7 +75,19 @@ std::ostream &operator<<(std::ostream &str, const matrix2<T> &m);
 // operátory porovnání (najprve porovnat velikosti, pokud jsou stejné, pak
 // obsah)
 template <typename T>
-bool operator==(const matrix2<T> &l, const matrix2<T> &r);
+bool operator==(const matrix2<T> &lhs, const matrix2<T> &rhs) {
+  if (lhs.m() != rhs.m() || rhs.n() != rhs.n()) return false;
+
+  for (std::size_t i = 0; i < lhs.m(); i++) {
+    for (std::size_t j = 0; j < lhs.n(); j++) {
+      if (lhs.at(i, j) != rhs.at(i, j)) {
+        return false;
+      }
+    }
+  }
+
+  return true;
+}
 
 template <typename T>
 bool operator!=(const matrix2<T> &l, const matrix2<T> &r);
@@ -72,12 +95,8 @@ bool operator!=(const matrix2<T> &l, const matrix2<T> &r);
 // binární aritmetické operátory
 template <typename T>
 matrix2<T> operator+(const matrix2<T> &lhs, const matrix2<T> &rhs) {
-  if (lhs.m() != rhs.m()) {
-    throw std::range_error("Row size must be the same");
-  }
-  if (lhs.n() != rhs.n()) {
-    throw std::range_error("Column size must be the same");
-  }
+  if (lhs.m() != rhs.m()) { throw std::range_error("Row size must be the same"); }
+  if (lhs.n() != rhs.n()) { throw std::range_error("Column size must be the same"); }
 
   matrix2<T> result(lhs.m(), lhs.n());
 
@@ -103,7 +122,7 @@ int main() {
 
     try {
       m2.at(2, 3);
-    } catch (const std::out_of_range& e) {
+    } catch (const std::out_of_range &e) {
       thrown = true;
     }
 
@@ -121,6 +140,37 @@ int main() {
 
     matrix2<int> m3 = m1 + m2;
     assert(m3.at(0, 0) == 7);
+  }
+
+  {
+    matrix2<int> m1(1, 1);
+    m1.at(0, 0) = 3;
+    matrix2<int> m2(1, 1);
+    m2.at(0, 0) = 4;
+
+    m1 += m2;
+
+    assert(m1.at(0, 0) == 7);
+    assert(m2.at(0, 0) == 4);
+  }
+
+  {
+    matrix2<int> m1(1, 1);
+    m1.at(0, 0) = 3;
+
+    matrix2<int> m2(1, 1);
+    m2.at(0, 0) = 3;
+
+    matrix2<int> m3(1, 2);
+
+    assert(m1 == m2);
+
+    m2.at(0, 0) = 4;
+    assert(!(m1 == m2));
+
+    assert(!(m1 == m3));
+    assert(!(m2 == m3));
+
   }
 
   return 0;
