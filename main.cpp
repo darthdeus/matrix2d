@@ -44,8 +44,9 @@ class matrix2 {
   // přinásobení matice odpovídajících rozměrů (může změnit velikost matice)
   matrix2<T> &operator*=(const matrix2<T> &m);
 
-  const int row_count() const { return m; }
-  const int column_count() const { return n; }
+  std::size_t row_count() const { return m; }
+  std::size_t column_count() const { return n; }
+  std::size_t size() const { return m * n; }
 
  private:
   std::vector<std::vector<T>> _data;
