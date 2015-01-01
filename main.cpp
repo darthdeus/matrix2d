@@ -35,7 +35,10 @@ class matrix2 {
 
   // přičtení matice stejného rozměru
   matrix2<T> &operator+=(const matrix2<T> &m) {
+    if (row_count() != m.row_count()) { throw std::range_error("Row size must be the same"); }
+    if (column_count() != m.column_count()) { throw std::range_error("Column size must be the same"); }
 
+    matrix2<T> result(row_count(), column_count());
   }
 
   // přinásobení matice odpovídajících rozměrů (může změnit velikost matice)
