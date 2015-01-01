@@ -98,7 +98,7 @@ std::istream &operator>>(std::istream &is, matrix2<T> &m) {
 
     for (int j = 0; j < N; j++) {
       is >> m.at(i, j);
-      if (j < N - j) is >> ',';
+      if (j < N - 1) is >> ',';
     }
 
     is >> '}';
