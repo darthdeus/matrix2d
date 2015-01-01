@@ -35,22 +35,22 @@ class matrix2 {
   // přinásobení matice odpovídajících rozměrů (může změnit velikost matice)
   matrix2<T> &operator*=(const matrix2<T> &m);
 
-  std::size_t row_count() const { return m; }
-  std::size_t col_count() const { return n; }
-  std::size_t size() const { return m * n; }
+  std::size_t m() const { return _m; }
+  std::size_t n() const { return _n; }
+  std::size_t size() const { return _m * _n; }
 
  private:
   std::vector<std::vector<T>> _data;
-  int m, n;
+  int _m, _n;
 };
 
 template <typename T>
 matrix2<T>::matrix2()
-    : m(0), n(0) {}
+    : _m(0), _n(0) {}
 
 template <typename T>
 matrix2<T>::matrix2(std::size_t m, std::size_t n)
-    : _data(m, std::vector<T>(n)), m(m), n(n) {}
+    : _data(m, std::vector<T>(n)), _m(m), _n(n) {}
 
 // operátor vstupu (viz níže formát souboru matice)
 template <typename T>
@@ -72,17 +72,17 @@ bool operator!=(const matrix2<T> &l, const matrix2<T> &r);
 // binární aritmetické operátory
 template <typename T>
 matrix2<T> operator+(const matrix2<T> &lhs, const matrix2<T> &rhs) {
-  if (lhs.row_count() != rhs.row_count()) {
+  if (lhs.m() != rhs.m()) {
     throw std::range_error("Row size must be the same");
   }
-  if (lhs.col_count() != rhs.col_count()) {
+  if (lhs.n() != rhs.n()) {
     throw std::range_error("Column size must be the same");
   }
 
-  matrix2<T> result(lhs.row_count(), lhs.col_count());
+  matrix2<T> result(lhs.m(), lhs.n());
 
-  for (std::size_t i = 0; i < lhs.row_count(); i++) {
-    for (std::size_t j = 0; j < lhs.col_count(); j++) {
+  for (std::size_t i = 0; i < lhs.m(); i++) {
+    for (std::size_t j = 0; j < lhs.n(); j++) {
       result.at(i, j) = lhs.at(i, j) + rhs.at(i, j);
     }
   }
@@ -103,14 +103,14 @@ int main() {
 
     try {
       m2.at(2, 3);
-    } catch (std::out_of_range e) {
+    } catch (const std::out_of_range& e) {
       thrown = true;
     }
 
     assert(thrown);
 
-    assert(m2.row_count() == 2);
-    assert(m2.col_count() == 3);
+    assert(m2.m() == 2);
+    assert(m2.n() == 3);
   }
 
   {
