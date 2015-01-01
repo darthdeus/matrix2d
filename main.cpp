@@ -65,11 +65,10 @@ std::istream &operator>>(std::istream &str, matrix2<T> &m);
 
 // operátor výstupu (viz níže formát souboru matice)
 template <typename T>
-
 std::ostream &operator<<(std::ostream &str, const matrix2<T> &m);
+
 // operátory porovnání (najprve porovnat velikosti, pokud jsou stejné, pak
 // obsah)
-
 template <typename T>
 bool operator==(const matrix2<T> &l, const matrix2<T> &r);
 
