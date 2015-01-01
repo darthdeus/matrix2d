@@ -34,21 +34,27 @@ class matrix2 {
   }
 
   // přičtení matice stejného rozměru
-  matrix2<T> &operator+=(const matrix2<T> &m);
+  matrix2<T> &operator+=(const matrix2<T> &m) {
+
+  }
 
   // přinásobení matice odpovídajících rozměrů (může změnit velikost matice)
   matrix2<T> &operator*=(const matrix2<T> &m);
 
+  const int row_count() const { return m; }
+  const int column_count() const { return n; }
+
  private:
   std::vector<std::vector<T>> _data;
+  int m, n;
 };
 
 template <typename T>
-matrix2<T>::matrix2() {}
+matrix2<T>::matrix2(): m(0), n(0) {}
 
 template <typename T>
 matrix2<T>::matrix2(std::size_t m, std::size_t n):
-  _data(m, std::vector<T>(n)) {
+  _data(m, std::vector<T>(n)), m(m), n(n) {
 
 }
 
@@ -79,11 +85,23 @@ matrix2<T> operator*(const matrix2<T> &l, const matrix2<T> &r);
 
 int main() {
   matrix2<int> m;
-  matrix2<int> m2(5, 5);
-  matrix2<int> m3(5, 10);
+  matrix2<int> m2(2, 3);
 
-  m3.at(0,0) = 5;
-  assert(m3.at(0, 0) == 5);
+  m2.at(0,0) = 5;
+  assert(m2.at(0, 0) == 5);
+
+  bool thrown = false;
+
+  try {
+    m2.at(2, 3);
+  } catch (std::out_of_range e) {
+    thrown = true;
+  }
+
+  assert(thrown);
+
+  assert(m2.row_count() == 2);
+  assert(m2.column_count() == 3);
 
   return 0;
 }
