@@ -4,6 +4,14 @@
 #include <string>
 #include <sstream>
 
+// Muzeme pouzit pro "sezrani" znaku ze streamu.
+// Pokud tam ocekavany znak neni, nastavi se failbit.
+std::istream& operator>>(std::istream& is, const char&& c) {
+  char x; is >> x;
+  if (x != c) is.setstate(std::ios::failbit);
+  return is;
+}
+
 template <typename T>
 class matrix2 {
  public:
@@ -58,6 +66,12 @@ class matrix2 {
   inline std::size_t n() const { return _n; }
   inline std::size_t size() const { return _m * _n; }
 
+  void resize(int m, int n) {
+    _m = m;
+    _n = n;
+    _data.resize(m, std::vector<T>(n));
+  }
+
  private:
   std::vector<std::vector<T>> _data;
   int _m, _n;
@@ -74,7 +88,25 @@ matrix2<T>::matrix2(std::size_t m, std::size_t n)
 // operátor vstupu (viz níže formát souboru matice)
 template <typename T>
 std::istream &operator>>(std::istream &is, matrix2<T> &m) {
+  int M, N;
+  is >> '{' >> M >> N;
 
+  m.resize(M, N);
+
+  for (int i = 0; i < M; i++) {
+    is >> '{';
+
+    for (int j = 0; j < N; j++) {
+      is >> m.at(i, j);
+      if (j < N - j) is >> ',';
+    }
+
+    is >> '}';
+  }
+
+  is >> '}';
+
+  return is;
 }
 
 // operátor výstupu (viz níže formát souboru matice)
@@ -124,31 +156,31 @@ matrix2<T> operator*(const matrix2<T> &lhs, const matrix2<T> &rhs) {
   if (lhs.n() != rhs.m()) { throw std::range_error("Invalid matrix size for matrix multiplication. lhs.n != rhs.m"); }
 }
 
-// Muzeme pouzit pro "sezrani" znaku ze streamu.
-// Pokud tam ocekavany znak neni, nastavi se failbit.
-class character {
-  public:
-    char expected;
-    character(char expected_char): expected(expected_char) {}
-};
-
-std::istream& operator>>(std::istream& is, const character&& c) {
-  char x; is >> x;
-
-  if (x != c.expected) is.setstate(std::ios::failbit);
-
-  return is;
-}
-
 int main() {
   {
     std::stringstream ss("hello");
 
-    ss >> character('h');
+    ss >> 'h';
     assert(ss.good());
 
-    ss >> character('a');
+    ss >> 'a';
     assert(!ss.good());
+  }
+
+  {
+    matrix2<int> m{};
+    std::stringstream ss("{ 2 3\n{ 1, 2, 3 }\n{ 4, 5, 6 }\n}");
+    ss >> m;
+
+    assert(m.m() == 2);
+    assert(m.n() == 3);
+
+    assert(m.at(0, 0) == 1);
+    assert(m.at(0, 1) == 2);
+    assert(m.at(0, 2) == 3);
+    assert(m.at(1, 0) == 4);
+    assert(m.at(1, 1) == 5);
+    assert(m.at(1, 2) == 6);
   }
 
   {
