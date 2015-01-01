@@ -1,9 +1,10 @@
 #include <cassert>
 #include <iostream>
 #include <vector>
+#include <string>
+#include <sstream>
 
 template <typename T>
-
 class matrix2 {
  public:
   // zkonstruuje prázdnou matici o rozměrech 0*0
@@ -16,15 +17,22 @@ class matrix2 {
   // prvky matice, nejprve po řádcích, pak po sloupcích v řádce, size() vrací
   // počet prvků v matici
 
+  using value_type = T;
+  using row_value_type = std::vector<T>;
+  using row_iterator = typename std::vector<row_value_type>::iterator;
+
   // splnění požadavků na iterativní kontejner řádků - typy i funkce budou mít
   // prefix row_ (např. row_value_type, row_cbegin), row_size vrací M
+  row_iterator row_begin() { return _data.begin(); }
+  row_iterator row_end() { return _data.end(); }
+  inline std::size_t row_size() const { return m(); }
 
   // splnění požadavků na iterativní kontejner sloupců - typy i funkce budou mít
   // prefix column_ (např. column_value_type, column_cbegin), column_size vrací
   // N
+  inline std::size_t column_size() const { return m(); }
 
   // přímý přístup na jednotlivé prvky - 0-based (rozsahy <0;M-1> a <0;N-1>)
-
   T &at(std::size_t i, std::size_t j) { return _data.at(i).at(j); }
 
   const T &at(std::size_t i, std::size_t j) const { return _data.at(i).at(j); }
@@ -46,9 +54,9 @@ class matrix2 {
   // přinásobení matice odpovídajících rozměrů (může změnit velikost matice)
   matrix2<T> &operator*=(const matrix2<T> &m);
 
-  std::size_t m() const { return _m; }
-  std::size_t n() const { return _n; }
-  std::size_t size() const { return _m * _n; }
+  inline std::size_t m() const { return _m; }
+  inline std::size_t n() const { return _n; }
+  inline std::size_t size() const { return _m * _n; }
 
  private:
   std::vector<std::vector<T>> _data;
@@ -65,12 +73,13 @@ matrix2<T>::matrix2(std::size_t m, std::size_t n)
 
 // operátor vstupu (viz níže formát souboru matice)
 template <typename T>
+std::istream &operator>>(std::istream &is, matrix2<T> &m) {
 
-std::istream &operator>>(std::istream &str, matrix2<T> &m);
+}
 
 // operátor výstupu (viz níže formát souboru matice)
 template <typename T>
-std::ostream &operator<<(std::ostream &str, const matrix2<T> &m);
+std::ostream &operator<<(std::ostream &os, const matrix2<T> &m);
 
 // operátory porovnání (najprve porovnat velikosti, pokud jsou stejné, pak
 // obsah)
@@ -111,9 +120,37 @@ matrix2<T> operator+(const matrix2<T> &lhs, const matrix2<T> &rhs) {
   return result;
 }
 template <typename T>
-matrix2<T> operator*(const matrix2<T> &l, const matrix2<T> &r);
+matrix2<T> operator*(const matrix2<T> &lhs, const matrix2<T> &rhs) {
+  if (lhs.n() != rhs.m()) { throw std::range_error("Invalid matrix size for matrix multiplication. lhs.n != rhs.m"); }
+}
+
+// Muzeme pouzit pro "sezrani" znaku ze streamu.
+// Pokud tam ocekavany znak neni, nastavi se failbit.
+class character {
+  public:
+    char expected;
+    character(char expected_char): expected(expected_char) {}
+};
+
+std::istream& operator>>(std::istream& is, const character&& c) {
+  char x; is >> x;
+
+  if (x != c.expected) is.setstate(std::ios::failbit);
+
+  return is;
+}
 
 int main() {
+  {
+    std::stringstream ss("hello");
+
+    ss >> character('h');
+    assert(ss.good());
+
+    ss >> character('a');
+    assert(!ss.good());
+  }
+
   {
     matrix2<int> m2(2, 3);
 
