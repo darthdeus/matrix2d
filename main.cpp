@@ -7,6 +7,7 @@
 template <typename T>
 class matrix2;
 
+// Iterator pro jednotlive radky v prubehu iterovani pres sloupce.
 template <typename T>
 class matrix_item_iterator {
   matrix2<T>& _matrix;
@@ -27,6 +28,7 @@ class matrix_item_iterator {
   iterator operator--(int) { iterator tmp = *this; --_row; return tmp; }
 };
 
+// Iterator pro sloupce matice
 template <typename T>
 class matrix_column_iterator {
  private:
