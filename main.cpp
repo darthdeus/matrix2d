@@ -22,6 +22,9 @@ class matrix_item_iterator {
 
   iterator& operator++() { ++_row; return *this; }
   iterator operator++(int) { iterator tmp = *this; ++_row; return tmp; }
+
+  iterator& operator--() { --_row; return *this; }
+  iterator operator--(int) { iterator tmp = *this; --_row; return tmp; }
 };
 
 template <typename T>
@@ -39,6 +42,9 @@ class matrix_column_iterator {
 
   iterator& operator++() { ++_col; return *this; }
   iterator operator++(int) { iterator tmp = *this; ++_col; return tmp; }
+
+  iterator& operator--() { --_col; return *this; }
+  iterator operator--(int) { iterator tmp = *this; --_col; return tmp; }
 
   bool operator!=(iterator& rhs) { return _matrix == rhs._matrix && _col == rhs._col; }
 };
@@ -360,6 +366,9 @@ int main() {
     auto c3 = *it++;
     assert(*c3++ == 3);
     assert(*c3++ == 6);
+
+    c3--; c3--;
+    assert(*c3 == 3);
   }
 
   return 0;
