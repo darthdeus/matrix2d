@@ -245,14 +245,21 @@ std::istream &operator>>(std::istream &is, matrix2<T> &m) {
 // operátor výstupu (viz níže formát souboru matice)
 template <typename T>
 std::ostream &operator<<(std::ostream &os, const matrix2<T> &m) {
-  os << "{" << m.m() << " " << m.n() << std::endl;
+  os << "{ " << m.m() << " " << m.n() << std::endl;
 
   for (auto it = m.row_begin(); it != m.row_end(); it++) {
-    os << "{";
-    for (auto i : *it) {
-      os << i << ",";
+    os << "{ ";
+
+    auto v = *it;
+    auto vit = begin(v);
+    for (std::size_t i = 0; i < v.size(); i++) {
+      os << *vit;
+      if (i != v.size() - 1) {
+        os << ", ";
+      }
+      vit++;
     }
-    os << "}" << std::endl;
+    os << " }" << std::endl;
   }
 
   os << "}";
@@ -377,8 +384,8 @@ int main() {
 
     std::stringstream os;
     os << m;
-    assert(os.str() == "{2 3\n{1,2,3,}\n{4,5,6,}\n}");
     // std::cout << os.str() << std::endl;
+    assert(os.str() == "{ 2 3\n{ 1, 2, 3 }\n{ 4, 5, 6 }\n}");
   }
 
   {
