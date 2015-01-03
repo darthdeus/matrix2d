@@ -86,6 +86,12 @@ class matrix2 {
   inline std::size_t max_size() const { return size(); }
   inline bool empty() const { return _m == 0 && _n == 0; }
 
+  void swap(matrix2<T> b) {
+    std::swap(_data, b._data);
+    std::swap(_m, b._m);
+    std::swap(_n, b._n);
+  }
+
   void resize(int m, int n) {
     _m = m;
     _n = n;
