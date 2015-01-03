@@ -299,7 +299,6 @@ matrix2<T> operator+(const matrix2<T> &lhs, const matrix2<T> &rhs) {
 
   return result;
 }
-
 template <typename T>
 matrix2<T> operator*(matrix2<T> &lhs, matrix2<T> &rhs) {
   if (lhs.n() != rhs.m()) {
@@ -316,12 +315,8 @@ matrix2<T> operator*(matrix2<T> &lhs, matrix2<T> &rhs) {
   typename matrix2<T>::const_row_iterator lit = lhs.row_begin();
   typename matrix2<T>::column_iterator rit = rhs.column_begin();
 
-  for (auto i = result.row_begin(); i != result.row_end(); i++) {
-    typename matrix2<T>::row_iterator::value_type result_row = *i;
-
-    for (auto j = result_row.begin(); j != result_row.end(); j++) {
-
-      std::size_t k = lhs.n();
+  for (std::size_t i = 0; i < result.m(); i++) {
+    for (std::size_t j = 0; j < result.n(); j++) {
       // Explicitni typy pro kontrolu, aby bylo jasne s cim se kde iteruje
       std::vector<T> left = *lit;
       matrix_column<T> right = *rit;
@@ -330,21 +325,18 @@ matrix2<T> operator*(matrix2<T> &lhs, matrix2<T> &rhs) {
       typename matrix_column<T>::iterator y = right.begin();
 
       T value{};
+
+      std::size_t k = lhs.n();
       while (k--) {
-        std::cout << *x << " * " << *y << std::endl;
         value += (*x) * (*y);
         x++;
         y++;
       }
 
-      T& cell = *j;
-      cell = value;
-
-      std::cout << "\t" << value << std::endl;
+      result.at(i, j) = value;
 
       rit++;
     }
-
     lit++;
   }
 
@@ -524,7 +516,6 @@ int main() {
     ss2 >> m2;
 
     auto m3 = m1 * m2;
-    std::cout << m3 << std::endl;
     assert(m3.at(0, 0) == 64);
     assert(m3.at(0, 1) == 89);
   }
