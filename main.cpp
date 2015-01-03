@@ -10,7 +10,6 @@ template <typename T>
 class matrix2;
 
 // Iterator pro jednotlive radky v prubehu iterovani pres sloupce.
-// TODO - prejmenovat na column
 template <typename T>
 class matrix_column {
   matrix2<T>& _matrix;
