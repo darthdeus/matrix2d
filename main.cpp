@@ -26,6 +26,9 @@ class matrix_item_iterator {
 
   iterator& operator--() { --_row; return *this; }
   iterator operator--(int) { iterator tmp = *this; --_row; return tmp; }
+
+  bool operator==(iterator& rhs) { return _matrix == rhs._matrix && _col == rhs._col && _row == rhs._row; }
+  bool operator!=(iterator& rhs) { return (*this == rhs); }
 };
 
 // Iterator pro sloupce matice
@@ -48,7 +51,14 @@ class matrix_column_iterator {
   iterator& operator--() { --_col; return *this; }
   iterator operator--(int) { iterator tmp = *this; --_col; return tmp; }
 
-  bool operator!=(iterator& rhs) { return _matrix == rhs._matrix && _col == rhs._col; }
+  iterator& operator+=(int n) { _col += n; return *this; }
+  iterator& operator-=(int n) { _col -= n; return *this; }
+
+  iterator operator+(int n) { auto tmp = *this; return tmp += n; }
+  iterator operator-(int n) { auto tmp = *this; return tmp -= n; }
+
+  bool operator==(iterator& rhs) { return _matrix == rhs._matrix || _col == rhs._col; }
+  bool operator!=(iterator& rhs) { return !(*this == rhs); }
 };
 
 // Muzeme pouzit pro "sezrani" znaku ze streamu. Pokud tam ocekavany znak neni,
@@ -351,6 +361,7 @@ int main() {
   }
 
   {
+    // Iterator test
     matrix2<int> m{};
     std::stringstream ss("{ 2 3\n{ 1, 2, 3 }\n{ 4, 5, 6 }\n}");
     ss >> m;
@@ -371,6 +382,24 @@ int main() {
 
     c3--; c3--;
     assert(*c3 == 3);
+
+    auto c4 = *(it - 2);
+    auto c5 = *(it - 2);
+
+    assert(c4 == c5);
+
+    auto c6 = m.column_begin();
+    c6 += 1;
+    auto c7 = m.column_begin();
+    c7++;
+
+    assert(c6 == c7);
+
+    c6--;
+    c6 += 2;
+    c7++;
+
+    assert(c6 == c7);
   }
 
   return 0;
