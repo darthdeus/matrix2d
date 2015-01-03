@@ -12,13 +12,13 @@ class matrix2;
 // Iterator pro jednotlive radky v prubehu iterovani pres sloupce.
 // TODO - prejmenovat na column
 template <typename T>
-class matrix_item_iterator {
+class matrix_column {
   matrix2<T>& _matrix;
   std::size_t _row = 0;
   std::size_t _col;
 
  public:
-  using iterator = matrix_item_iterator<T>;
+  using iterator = matrix_column<T>;
   using iterator_category = std::random_access_iterator_tag;
 
   using value_type = T;
@@ -26,7 +26,7 @@ class matrix_item_iterator {
   using pointer = T*;
   using difference_type = std::ptrdiff_t;
 
-  matrix_item_iterator(matrix2<T>& m, std::size_t col): _matrix(m), _col(col) {}
+  matrix_column(matrix2<T>& m, std::size_t col): _matrix(m), _col(col) {}
 
   reference operator*() { return _matrix.at(_row, _col); }
 
@@ -70,14 +70,14 @@ class matrix_column_iterator {
   using iterator = matrix_column_iterator<T>;
   using iterator_category = std::random_access_iterator_tag;
 
-  using value_type = matrix_item_iterator<T>;
+  using value_type = matrix_column<T>;
   using reference = value_type&;
   using pointer = value_type*;
   using difference_type = std::ptrdiff_t;
 
   matrix_column_iterator(matrix2<T>& m): _matrix(m) {}
 
-  value_type operator*() { return matrix_item_iterator<T>(_matrix, _col); }
+  value_type operator*() { return matrix_column<T>(_matrix, _col); }
 
   iterator& operator++() { ++_col; return *this; }
   iterator operator++(int) { iterator tmp = *this; ++_col; return tmp; }
@@ -158,14 +158,15 @@ class matrix2 {
   // prefix column_ (např. column_value_type, column_cbegin), column_size vrací N
   // using column_value_type = row_iterator<T>;
   using column_iterator = matrix_column_iterator<T>;
-  // using const_column_iterator = column_iterator<T>;
+  using const_column_iterator = matrix_column_iterator<T>;
 
   column_iterator column_begin() { return matrix_column_iterator<T>(*this); }
-  column_iterator column_begin() const { return matrix_column_iterator<T>(*this); }
+  // const_column_iterator column_begin() const { return matrix_column_iterator<T>(*this); }
+  const_column_iterator column_cbegin() const { return matrix_column_iterator<T>(*this); }
 
   column_iterator column_end() { return matrix_column_iterator<T>(*this) + n(); }
-  column_iterator column_end() const { return matrix_column_iterator<T>(*this) + n(); }
-  // TODO - cbegin cend
+  const_column_iterator column_end() const { return matrix_column_iterator<T>(*this) + n(); }
+  const_column_iterator column_cend() const { return matrix_column_iterator<T>(*this) + n(); }
 
   inline std::size_t column_size() const { return m(); }
 
@@ -300,26 +301,33 @@ matrix2<T> operator+(const matrix2<T> &lhs, const matrix2<T> &rhs) {
 }
 
 template <typename T>
-matrix2<T> operator*(const matrix2<T> &lhs, const matrix2<T> &rhs) {
-  if (lhs.n() != rhs.m()) { throw std::range_error("Invalid matrix size for matrix multiplication. lhs.n != rhs.m"); }
+matrix2<T> operator*(matrix2<T> &lhs, matrix2<T> &rhs) {
+  if (lhs.n() != rhs.m()) {
+    std::stringstream ss;
+    ss << "Invalid matrix size for matrix multiplication. ";
+    ss << "lhs.n: " << lhs.n();
+    ss << " != rhs.m: " << rhs.m();;
+
+    throw std::range_error(ss.str());
+  }
 
   matrix2<T> result(lhs.m(), rhs.n());
 
   typename matrix2<T>::const_row_iterator lit = lhs.row_begin();
-  typename matrix2<T>::column_iterator rit = rhs.column_begin(); // TODO - const
+  typename matrix2<T>::column_iterator rit = rhs.column_begin();
 
-  for (auto i = result.row_begin(); i != result.row_end(); i++, lit++) {
+  for (auto i = result.row_begin(); i != result.row_end(); i++) {
     typename matrix2<T>::row_iterator::value_type result_row = *i;
 
-    for (auto j = result_row.begin(); j != result_row.end(); j++, rit++) {
+    for (auto j = result_row.begin(); j != result_row.end(); j++) {
 
       std::size_t k = lhs.n();
       // Explicitni typy pro kontrolu, aby bylo jasne s cim se kde iteruje
       std::vector<T> left = *lit;
-      matrix_item_iterator<T> right = *rit;
+      matrix_column<T> right = *rit;
 
       typename std::vector<T>::iterator x = left.begin();
-      typename matrix_item_iterator<T>::iterator y = right.begin();
+      typename matrix_column<T>::iterator y = right.begin();
 
       T value{};
       while (k--) {
@@ -329,7 +337,11 @@ matrix2<T> operator*(const matrix2<T> &lhs, const matrix2<T> &rhs) {
       }
 
       *j = value;
+
+      rit++;
     }
+
+    lit++;
   }
 
   return result;
@@ -505,9 +517,10 @@ int main() {
 
     matrix2<int> m2{};
     std::stringstream ss2("{ 3 2\n{ 2, 3}\n {5, 8}\n{7, 9}\n}");
-    ss2 >> m1;
+    ss2 >> m2;
 
     auto m3 = m1 * m2;
+    std::cout << m3 << std::endl;
     assert(m3.at(0, 0) == 64);
     assert(m3.at(0, 1) == 89);
   }
