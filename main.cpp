@@ -331,12 +331,16 @@ matrix2<T> operator*(matrix2<T> &lhs, matrix2<T> &rhs) {
 
       T value{};
       while (k--) {
-        value += + (*x) * (*y);
+        std::cout << *x << " * " << *y << std::endl;
+        value += (*x) * (*y);
         x++;
         y++;
       }
 
-      *j = value;
+      T& cell = *j;
+      cell = value;
+
+      std::cout << "\t" << value << std::endl;
 
       rit++;
     }
