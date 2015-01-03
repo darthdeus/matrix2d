@@ -427,9 +427,18 @@ int main() {
 
     c6--;
     c6 += 2;
+
+    assert(c6 > c7);
+    assert(c6 >= c7);
+
+    assert(c7 < c6);
+    assert(c7 <= c6);
+
     c7++;
 
+    assert(c6 >= c7);
     assert(c6 == c7);
+    assert(c7 <= c6);
   }
 
   return 0;
