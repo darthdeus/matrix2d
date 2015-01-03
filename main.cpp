@@ -1,4 +1,5 @@
 #include <cassert>
+#include <iterator>
 #include <iostream>
 #include <vector>
 #include <string>
@@ -16,6 +17,7 @@ class matrix_item_iterator {
 
  public:
   using iterator = matrix_item_iterator<T>;
+  using iterator_category = std::random_access_iterator_tag;
 
   matrix_item_iterator(matrix2<T>& m, std::size_t col): _matrix(m), _col(col) {}
 
@@ -29,6 +31,22 @@ class matrix_item_iterator {
 
   bool operator==(iterator& rhs) { return _matrix == rhs._matrix && _col == rhs._col && _row == rhs._row; }
   bool operator!=(iterator& rhs) { return (*this == rhs); }
+
+  iterator& operator+=(int n) { _row += n; return *this; }
+  iterator& operator-=(int n) { _row -= n; return *this; }
+
+  iterator operator+(int n) { auto tmp = *this; return tmp += n; }
+  iterator operator-(int n) { auto tmp = *this; return tmp -= n; }
+
+  std::ptrdiff_t operator-(const iterator& rhs) { return _row - rhs._row; }
+
+  T& operator[](std::size_t n) { return *(*this + n); }
+
+  bool operator<(const iterator& rhs) { return _row < rhs._row; }
+  bool operator>(const iterator& rhs) { return _row > rhs._row; }
+
+  bool operator<=(const iterator& rhs) { return _row <= rhs._row; }
+  bool operator>=(const iterator& rhs) { return _row >= rhs._row; }
 };
 
 // Iterator pro sloupce matice
@@ -40,6 +58,7 @@ class matrix_column_iterator {
 
  public:
   using iterator = matrix_column_iterator<T>;
+  using iterator_category = std::random_access_iterator_tag;
 
   matrix_column_iterator(matrix2<T>& m): _matrix(m) {}
 
@@ -51,14 +70,23 @@ class matrix_column_iterator {
   iterator& operator--() { --_col; return *this; }
   iterator operator--(int) { iterator tmp = *this; --_col; return tmp; }
 
+  bool operator==(iterator& rhs) { return _matrix == rhs._matrix || _col == rhs._col; }
+  bool operator!=(iterator& rhs) { return !(*this == rhs); }
+
   iterator& operator+=(int n) { _col += n; return *this; }
   iterator& operator-=(int n) { _col -= n; return *this; }
 
   iterator operator+(int n) { auto tmp = *this; return tmp += n; }
   iterator operator-(int n) { auto tmp = *this; return tmp -= n; }
+  std::ptrdiff_t operator-(const iterator& rhs) { return _col - rhs._col; }
 
-  bool operator==(iterator& rhs) { return _matrix == rhs._matrix || _col == rhs._col; }
-  bool operator!=(iterator& rhs) { return !(*this == rhs); }
+  matrix_item_iterator<T> operator[](std::size_t n) { return *(*this + n); }
+
+  bool operator<(const iterator& rhs) { return _col < rhs._col; }
+  bool operator>(const iterator& rhs) { return _col > rhs._col; }
+
+  bool operator<=(const iterator& rhs) { return _col <= rhs._col; }
+  bool operator>=(const iterator& rhs) { return _col >= rhs._col; }
 };
 
 // Muzeme pouzit pro "sezrani" znaku ze streamu. Pokud tam ocekavany znak neni,
@@ -90,6 +118,8 @@ class matrix2 {
   using value_type = T;
   using reference = T&;
   using const_reference = const T&;
+  using size_tag = std::size_t;
+
   using row_value_type = std::vector<T>;
   using difference_type = typename std::vector<row_value_type>::difference_type;
 
