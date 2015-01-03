@@ -29,8 +29,8 @@ class matrix_item_iterator {
   iterator& operator--() { --_row; return *this; }
   iterator operator--(int) { iterator tmp = *this; --_row; return tmp; }
 
-  bool operator==(iterator& rhs) { return _matrix == rhs._matrix && _col == rhs._col && _row == rhs._row; }
-  bool operator!=(iterator& rhs) { return (*this == rhs); }
+  bool operator==(const iterator& rhs) { return _matrix == rhs._matrix && _col == rhs._col && _row == rhs._row; }
+  bool operator!=(const iterator& rhs) { return (*this == rhs); }
 
   iterator& operator+=(int n) { _row += n; return *this; }
   iterator& operator-=(int n) { _row -= n; return *this; }
@@ -70,8 +70,8 @@ class matrix_column_iterator {
   iterator& operator--() { --_col; return *this; }
   iterator operator--(int) { iterator tmp = *this; --_col; return tmp; }
 
-  bool operator==(iterator& rhs) { return _matrix == rhs._matrix || _col == rhs._col; }
-  bool operator!=(iterator& rhs) { return !(*this == rhs); }
+  bool operator==(const iterator& rhs) { return _matrix == rhs._matrix || _col == rhs._col; }
+  bool operator!=(const iterator& rhs) { return !(*this == rhs); }
 
   iterator& operator+=(int n) { _col += n; return *this; }
   iterator& operator-=(int n) { _col -= n; return *this; }
@@ -145,12 +145,7 @@ class matrix2 {
   // using const_column_iterator = column_iterator<T>;
 
   column_iterator column_begin() { return matrix_column_iterator<T>(*this); }
-  column_iterator column_end() {
-    auto it = matrix_column_iterator<T>(*this);
-    // TODO - fix this
-    assert(false);
-    return it;
-  }
+  column_iterator column_end() { return matrix_column_iterator<T>(*this) + n(); }
 
   inline std::size_t column_size() const { return m(); }
 
@@ -287,6 +282,10 @@ matrix2<T> operator+(const matrix2<T> &lhs, const matrix2<T> &rhs) {
 template <typename T>
 matrix2<T> operator*(const matrix2<T> &lhs, const matrix2<T> &rhs) {
   if (lhs.n() != rhs.m()) { throw std::range_error("Invalid matrix size for matrix multiplication. lhs.n != rhs.m"); }
+
+  matrix2<T> result(lhs.m(), rhs.n());
+
+  auto it = result.row_iterator();
 }
 
 int main() {
@@ -439,6 +438,16 @@ int main() {
     assert(c6 >= c7);
     assert(c6 == c7);
     assert(c7 <= c6);
+  }
+
+  {
+    // Iterator test
+    matrix2<int> m{};
+    std::stringstream ss("{ 2 3\n{ 1, 2, 3 }\n{ 4, 5, 6 }\n}");
+    ss >> m;
+
+    auto it = m.column_begin();
+    assert((it + 3) == m.column_end());
   }
 
   return 0;
