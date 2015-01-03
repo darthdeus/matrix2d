@@ -359,6 +359,7 @@ matrix2<T> operator*(matrix2<T> &lhs, matrix2<T> &rhs) {
   return result;
 }
 
+// Obsahuje pouze testy
 int main() {
   {
     std::stringstream ss("hello");
@@ -371,6 +372,7 @@ int main() {
   }
 
   {
+    // Operator >> a cteni pres .at(i, j)
     matrix2<int> m{};
     std::stringstream ss("{ 2 3\n{ 1, 2, 3 }\n{ 4, 5, 6 }\n}");
     ss >> m;
@@ -387,6 +389,7 @@ int main() {
   }
 
   {
+    // Operator <<
     matrix2<int> m{};
     std::stringstream is("{ 2 3\n{ 1, 2, 3 }\n{ 4, 5, 6 }\n}");
     is >> m;
@@ -398,6 +401,7 @@ int main() {
   }
 
   {
+    // Range check pri pouziti .at(i, j)
     matrix2<int> m2(2, 3);
 
     m2.at(0, 0) = 5;
@@ -418,6 +422,7 @@ int main() {
   }
 
   {
+    // Scitani matic
     matrix2<int> m1(1, 1);
     m1.at(0, 0) = 3;
     matrix2<int> m2(1, 1);
@@ -428,6 +433,7 @@ int main() {
   }
 
   {
+    // Pricteni matice
     matrix2<int> m1(1, 1);
     m1.at(0, 0) = 3;
     matrix2<int> m2(1, 1);
@@ -440,6 +446,7 @@ int main() {
   }
 
   {
+    // Operator == a != pro matice
     matrix2<int> m1(1, 1);
     m1.at(0, 0) = 3;
 
@@ -461,7 +468,7 @@ int main() {
   }
 
   {
-    // Iterator test
+    // Iteratory
     matrix2<int> m{};
     std::stringstream ss("{ 2 3\n{ 1, 2, 3 }\n{ 4, 5, 6 }\n}");
     ss >> m;
