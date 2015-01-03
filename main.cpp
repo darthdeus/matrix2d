@@ -4,8 +4,8 @@
 #include <string>
 #include <sstream>
 
-// Muzeme pouzit pro "sezrani" znaku ze streamu.
-// Pokud tam ocekavany znak neni, nastavi se failbit.
+// Muzeme pouzit pro "sezrani" znaku ze streamu. Pokud tam ocekavany znak neni,
+// nastavi se failbit. rvalue referenci bereme proto, aby slo pouzit jen char literal.
 std::istream& operator>>(std::istream& is, const char&& c) {
   char x; is >> x;
   if (x != c) is.setstate(std::ios::failbit);
@@ -36,8 +36,10 @@ class matrix2 {
   inline std::size_t row_size() const { return m(); }
 
   // splnění požadavků na iterativní kontejner sloupců - typy i funkce budou mít
-  // prefix column_ (např. column_value_type, column_cbegin), column_size vrací
-  // N
+  // prefix column_ (např. column_value_type, column_cbegin), column_size vrací N
+  using column_value_type = std::vector<T>;
+  using column_iterator = typename std::vector<column_value_type>::iterator;
+
   inline std::size_t column_size() const { return m(); }
 
   // přímý přístup na jednotlivé prvky - 0-based (rozsahy <0;M-1> a <0;N-1>)
@@ -111,7 +113,20 @@ std::istream &operator>>(std::istream &is, matrix2<T> &m) {
 
 // operátor výstupu (viz níže formát souboru matice)
 template <typename T>
-std::ostream &operator<<(std::ostream &os, const matrix2<T> &m);
+std::ostream &operator<<(std::ostream &os, const matrix2<T> &m) {
+  os << "{" << m.m() << " " << m.n() << std::endl;
+
+  for (auto it = m.row_begin(); it != m.row_end(); it++) {
+    os << "{";
+    for (auto i : *it) {
+      os << i << ",";
+    }
+  }
+
+  os << "}" << std::endl;
+
+  return os;
+}
 
 // operátory porovnání (najprve porovnat velikosti, pokud jsou stejné, pak
 // obsah)
@@ -181,6 +196,16 @@ int main() {
     assert(m.at(1, 0) == 4);
     assert(m.at(1, 1) == 5);
     assert(m.at(1, 2) == 6);
+  }
+
+  {
+    matrix2<int> m{};
+    std::stringstream is("{ 2 3\n{ 1, 2, 3 }\n{ 4, 5, 6 }\n}");
+    is >> m;
+
+    std::stringstream os;
+    os << m;
+    std::cout << os.str() << std::endl;
   }
 
   {
