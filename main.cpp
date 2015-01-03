@@ -10,6 +10,8 @@ template <typename T>
 class matrix2;
 
 // Iterator pro jednotlive radky v prubehu iterovani pres sloupce.
+// Zaroven se take pouziva jako kontejner. Jeho kopirovani nevadi, protoze
+// si pouze drzi referenci na matici.
 template <typename T>
 class matrix_column {
   matrix2<T>& _matrix;
@@ -18,6 +20,7 @@ class matrix_column {
 
  public:
   using iterator = matrix_column<T>;
+  using const_iterator = matrix_column<T>;
   using iterator_category = std::random_access_iterator_tag;
 
   using value_type = T;
@@ -54,8 +57,13 @@ class matrix_column {
   bool operator<=(const iterator& rhs) { return _row <= rhs._row; }
   bool operator>=(const iterator& rhs) { return _row >= rhs._row; }
 
-  iterator begin() { return *this; }
-  iterator end() { return *this + _matrix.n(); }
+  iterator       begin()        { return *this; }
+  const_iterator begin() const  { return *this; }
+  const_iterator cbegin() const { return *this; }
+
+  iterator       end()        { return *this + _matrix.n(); }
+  const_iterator end() const  { return *this + _matrix.n(); }
+  const_iterator cend() const { return *this + _matrix.n(); }
 };
 
 // Iterator pro sloupce matice
@@ -78,10 +86,10 @@ class matrix_column_iterator {
 
   value_type operator*() { return matrix_column<T>(_matrix, _col); }
 
-  iterator& operator++() { ++_col; return *this; }
+  iterator& operator++()   { ++_col; return *this; }
   iterator operator++(int) { iterator tmp = *this; ++_col; return tmp; }
 
-  iterator& operator--() { --_col; return *this; }
+  iterator& operator--()   { --_col; return *this; }
   iterator operator--(int) { iterator tmp = *this; --_col; return tmp; }
 
   bool operator==(const iterator& rhs) { return _matrix == rhs._matrix || _col == rhs._col; }
@@ -114,12 +122,14 @@ std::istream& operator>>(std::istream& is, const char&& c) {
 
 template <typename T>
 class matrix2 {
-
  private:
   std::vector<std::vector<T>> _data;
   int _m, _n;
 
  public:
+  // POZNAMKA: Copy assignemnt/constructor staci defaultni implementace,
+  // protoze defaultni implementace na vectoru dela co potrebujeme.
+
   // zkonstruuje prázdnou matici o rozměrech 0*0
   matrix2();
 
@@ -143,15 +153,15 @@ class matrix2 {
 
   // splnění požadavků na iterativní kontejner řádků - typy i funkce budou mít
   // prefix row_ (např. row_value_type, row_cbegin), row_size vrací M
-  row_iterator row_begin() { return begin(_data); }
-  const_row_iterator row_begin() const { return begin(_data); }
+  row_iterator       row_begin()        { return begin(_data); }
+  const_row_iterator row_begin()  const { return begin(_data); }
   const_row_iterator row_cbegin() const { return begin(_data); }
 
-  row_iterator row_end() { return end(_data); }
-  const_row_iterator row_end() const { return end(_data); }
+  row_iterator       row_end()        { return end(_data); }
+  const_row_iterator row_end() const  { return end(_data); }
   const_row_iterator row_cend() const { return end(_data); }
 
-  inline std::size_t row_size() const { return m(); }
+  inline size_tag row_size() const { return m(); }
 
   // splnění požadavků na iterativní kontejner sloupců - typy i funkce budou mít
   // prefix column_ (např. column_value_type, column_cbegin), column_size vrací N
@@ -159,20 +169,19 @@ class matrix2 {
   using column_iterator = matrix_column_iterator<T>;
   using const_column_iterator = const matrix_column_iterator<T>;
 
-  column_iterator column_begin() { return matrix_column_iterator<T>(*this); }
-  const_column_iterator column_begin() const { return matrix_column_iterator<T>(*this); }
+  column_iterator       column_begin()        { return matrix_column_iterator<T>(*this); }
+  const_column_iterator column_begin()  const { return matrix_column_iterator<T>(*this); }
   const_column_iterator column_cbegin() const { return matrix_column_iterator<T>(*this); }
 
-  column_iterator column_end() { return matrix_column_iterator<T>(*this) + n(); }
-  const_column_iterator column_end() const { return matrix_column_iterator<T>(*this) + n(); }
+  column_iterator       column_end()        { return matrix_column_iterator<T>(*this) + n(); }
+  const_column_iterator column_end()  const { return matrix_column_iterator<T>(*this) + n(); }
   const_column_iterator column_cend() const { return matrix_column_iterator<T>(*this) + n(); }
 
-  inline std::size_t column_size() const { return m(); }
+  inline size_tag column_size() const { return m(); }
 
   // přímý přístup na jednotlivé prvky - 0-based (rozsahy <0;M-1> a <0;N-1>)
-  T &at(std::size_t i, std::size_t j) { return _data.at(i).at(j); }
-
-  const T &at(std::size_t i, std::size_t j) const { return _data.at(i).at(j); }
+  reference       at(std::size_t i, std::size_t j)       { return _data.at(i).at(j); }
+  const_reference at(std::size_t i, std::size_t j) const { return _data.at(i).at(j); }
 
   // přičtení matice stejného rozměru
   matrix2<T> &operator+=(const matrix2<T> &rhs) {
