@@ -158,10 +158,10 @@ class matrix2 {
   // prefix column_ (např. column_value_type, column_cbegin), column_size vrací N
   // using column_value_type = row_iterator<T>;
   using column_iterator = matrix_column_iterator<T>;
-  using const_column_iterator = matrix_column_iterator<T>;
+  using const_column_iterator = const matrix_column_iterator<T>;
 
   column_iterator column_begin() { return matrix_column_iterator<T>(*this); }
-  // const_column_iterator column_begin() const { return matrix_column_iterator<T>(*this); }
+  const_column_iterator column_begin() const { return matrix_column_iterator<T>(*this); }
   const_column_iterator column_cbegin() const { return matrix_column_iterator<T>(*this); }
 
   column_iterator column_end() { return matrix_column_iterator<T>(*this) + n(); }
