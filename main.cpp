@@ -299,6 +299,7 @@ matrix2<T> operator+(const matrix2<T> &lhs, const matrix2<T> &rhs) {
 
   return result;
 }
+
 template <typename T>
 matrix2<T> operator*(matrix2<T> &lhs, matrix2<T> &rhs) {
   if (lhs.n() != rhs.m()) {
