@@ -4,6 +4,45 @@
 #include <string>
 #include <sstream>
 
+template <typename T>
+class matrix2;
+
+template <typename T>
+class matrix_item_iterator {
+  matrix2<T>& _matrix;
+  std::size_t _row = 0;
+  std::size_t _col;
+
+ public:
+  using iterator = matrix_item_iterator<T>;
+
+  matrix_item_iterator(matrix2<T>& m, std::size_t col): _matrix(m), _col(col) {}
+
+  T& operator*() { return _matrix.at(_row, _col); }
+
+  iterator& operator++() { ++_row; return *this; }
+  iterator operator++(int) { iterator tmp = *this; ++_row; return tmp; }
+};
+
+template <typename T>
+class matrix_column_iterator {
+ private:
+  matrix2<T>& _matrix;
+  std::size_t _col = 0;
+
+ public:
+  using iterator = matrix_column_iterator<T>;
+
+  matrix_column_iterator(matrix2<T>& m): _matrix(m) {}
+
+  matrix_item_iterator<T> operator*() { return matrix_item_iterator<T>(_matrix, _col); }
+
+  iterator& operator++() { ++_col; return *this; }
+  iterator operator++(int) { iterator tmp = *this; ++_col; return tmp; }
+
+  bool operator!=(iterator& rhs) { return _matrix == rhs._matrix && _col == rhs._col; }
+};
+
 // Muzeme pouzit pro "sezrani" znaku ze streamu. Pokud tam ocekavany znak neni,
 // nastavi se failbit. rvalue referenci bereme proto, aby slo pouzit jen char literal.
 std::istream& operator>>(std::istream& is, const char&& c) {
@@ -53,8 +92,17 @@ class matrix2 {
 
   // splnění požadavků na iterativní kontejner sloupců - typy i funkce budou mít
   // prefix column_ (např. column_value_type, column_cbegin), column_size vrací N
-  using column_value_type = std::vector<T>;
-  using column_iterator = typename std::vector<column_value_type>::iterator;
+  // using column_value_type = row_iterator<T>;
+  using column_iterator = matrix_column_iterator<T>;
+  // using const_column_iterator = column_iterator<T>;
+
+  column_iterator column_begin() { return matrix_column_iterator<T>(*this); }
+  column_iterator column_end() {
+    auto it = matrix_column_iterator<T>(*this);
+    // TODO - fix this
+    assert(false);
+    return it;
+  }
 
   inline std::size_t column_size() const { return m(); }
 
@@ -89,7 +137,7 @@ class matrix2 {
   void swap(matrix2<T> b) {
     std::swap(_data, b._data);
     std::swap(_m, b._m);
-    std::swap(_n, b._n);
+    std::swap(_n, b._data);
   }
 
   void resize(int m, int n) {
@@ -187,6 +235,7 @@ matrix2<T> operator+(const matrix2<T> &lhs, const matrix2<T> &rhs) {
 
   return result;
 }
+
 template <typename T>
 matrix2<T> operator*(const matrix2<T> &lhs, const matrix2<T> &rhs) {
   if (lhs.n() != rhs.m()) { throw std::range_error("Invalid matrix size for matrix multiplication. lhs.n != rhs.m"); }
@@ -291,6 +340,26 @@ int main() {
 
     assert(m1 != m3);
     assert(m2 != m3);
+  }
+
+  {
+    matrix2<int> m{};
+    std::stringstream ss("{ 2 3\n{ 1, 2, 3 }\n{ 4, 5, 6 }\n}");
+    ss >> m;
+
+    auto it = m.column_begin();
+
+    auto c1 = *it++;
+    assert(*c1++ == 1);
+    assert(*c1++ == 4);
+
+    auto c2 = *it++;
+    assert(*c2++ == 2);
+    assert(*c2++ == 5);
+
+    auto c3 = *it++;
+    assert(*c3++ == 3);
+    assert(*c3++ == 6);
   }
 
   return 0;
