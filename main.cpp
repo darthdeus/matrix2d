@@ -14,6 +14,11 @@ std::istream& operator>>(std::istream& is, const char&& c) {
 
 template <typename T>
 class matrix2 {
+
+ private:
+  std::vector<std::vector<T>> _data;
+  int _m, _n;
+
  public:
   // zkonstruuje prázdnou matici o rozměrech 0*0
   matrix2();
@@ -26,13 +31,24 @@ class matrix2 {
   // počet prvků v matici
 
   using value_type = T;
+  using reference = T&;
+  using const_reference = const T&;
   using row_value_type = std::vector<T>;
+  using difference_type = typename std::vector<row_value_type>::difference_type;
+
   using row_iterator = typename std::vector<row_value_type>::iterator;
+  using const_row_iterator = typename std::vector<row_value_type>::const_iterator;
 
   // splnění požadavků na iterativní kontejner řádků - typy i funkce budou mít
   // prefix row_ (např. row_value_type, row_cbegin), row_size vrací M
-  row_iterator row_begin() { return _data.begin(); }
-  row_iterator row_end() { return _data.end(); }
+  row_iterator row_begin() { return begin(_data); }
+  const_row_iterator row_begin() const { return begin(_data); }
+  const_row_iterator row_cbegin() const { return begin(_data); }
+
+  row_iterator row_end() { return end(_data); }
+  const_row_iterator row_end() const { return end(_data); }
+  const_row_iterator row_cend() const { return end(_data); }
+
   inline std::size_t row_size() const { return m(); }
 
   // splnění požadavků na iterativní kontejner sloupců - typy i funkce budou mít
@@ -67,16 +83,14 @@ class matrix2 {
   inline std::size_t m() const { return _m; }
   inline std::size_t n() const { return _n; }
   inline std::size_t size() const { return _m * _n; }
+  inline std::size_t max_size() const { return size(); }
+  inline bool empty() const { return _m == 0 && _n == 0; }
 
   void resize(int m, int n) {
     _m = m;
     _n = n;
     _data.resize(m, std::vector<T>(n));
   }
-
- private:
-  std::vector<std::vector<T>> _data;
-  int _m, _n;
 };
 
 template <typename T>
@@ -121,9 +135,10 @@ std::ostream &operator<<(std::ostream &os, const matrix2<T> &m) {
     for (auto i : *it) {
       os << i << ",";
     }
+    os << "}" << std::endl;
   }
 
-  os << "}" << std::endl;
+  os << "}";
 
   return os;
 }
@@ -205,7 +220,8 @@ int main() {
 
     std::stringstream os;
     os << m;
-    std::cout << os.str() << std::endl;
+    assert(os.str() == "{2 3\n{1,2,3,}\n{4,5,6,}\n}");
+    // std::cout << os.str() << std::endl;
   }
 
   {
